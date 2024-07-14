@@ -6,7 +6,9 @@ import com.example.Crewpr.service.VacationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 @RestController
 @RequestMapping("/test")
@@ -23,10 +25,9 @@ public class CrewperController {
         super();
         this.vacationService=vacationService;
     }
-    @GetMapping ("/getEmployeefromKeycloak")
-    public ResponseEntity<?> getEmployeeFromKeycloak(){
-        return ResponseEntity.ok(employeeService.getEmployee());
-
+    @PostMapping("/ExtractEmployeeFromJWTAndSaveToDB")
+    public ResponseEntity<?> ExtractEmployeeFromJWTAndSaveToDB(@RequestHeader Jwt jwt){
+        return ResponseEntity.ok(employeeService.ExtractEmployeeFromJWTAndSaveToDB(jwt));
     }
     @PostMapping("/SubmitVacation")
      public ResponseEntity<?> submitVacation(@RequestBody Vacation vacation){

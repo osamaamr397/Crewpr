@@ -28,6 +28,7 @@ public class EmployeeService  {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
     public Employee createOrUpdateEmployee(String email, String name, Set<String> roles) {
         Employee employee = employeeRepository.findByEmail(email);
         if (employee == null) {
@@ -41,41 +42,88 @@ public class EmployeeService  {
     }
     String roles=null;
     List<SimpleGrantedAuthority> resourceRoles = new ArrayList<>();
+
+    public Employee ExtractEmployeeFromJWTAndSaveToDB(Jwt jwt) {
+        String email = jwt.getClaimAsString("email");
+        String name = jwt.getClaimAsString("given_name");
+        List<String> roleStrings = jwt.getClaimAsStringList("roles");
+        Set<String> roles = new HashSet<>(roleStrings);
+        return createOrUpdateEmployee(email, name, roles);
+    }
+         
+    /**
+     * 
+     * 
+     * Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AbstractAuthenticationToken) {
+            AbstractAuthenticationToken abstractAuthenticationToken = (AbstractAuthenticationToken) authentication;
+            Object principal = abstractAuthenticationToken.getPrincipal();
+            if (principal instanceof Jwt) {
+                Jwt jwt = (Jwt) principal;
+                String email = jwt.getClaimAsString("email");
+                String name = jwt.getClaimAsString("given_name");
+                List<String> roleStrings = jwt.getClaimAsStringList("roles");
+                Set<String> roles = new HashSet<>(roleStrings);
+                return createOrUpdateEmployee(email, name, roles);
+            } else {
+                throw new IllegalStateException("Unsupported principal type: " + principal.getClass());
+            }
+        } else {
+            throw new IllegalStateException("Unsupported authentication type: " + authentication.getClass());
+
+        }
+
+    }
+     * 
+     */
     
 
-    public Employee getEmployee() {
-        List<SimpleGrantedAuthority> resourceRoles = new ArrayList<>();
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-
+    public Employee processUserDetails_Employee(Object principal) {
+        Employee employee = new Employee();
+    
         String email;
         String name;
-        Set<String> roles = new HashSet<>(); // Initialize roles as an empty HashSet
+        List<String> roles = new ArrayList<>();
 
-         if (principal instanceof Jwt) {
+        if (principal instanceof Jwt) {
             Jwt jwt = (Jwt) principal;
-            
             email = jwt.getClaimAsString("email");
             name = jwt.getClaimAsString("given_name");
-            // Assuming resourceRoles is initialized and populated correctly before this snippet
             List<String> roleStrings = resourceRoles.stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
             roles.addAll(roleStrings);
-            System.out.println("Roles: " + roles);
         } else {
             throw new IllegalStateException("Unsupported principal type: " + principal.getClass());
         }
-        createOrUpdateEmployee(email, name, roles);
+        return employee;
+    }
+
+    public Employee processUserDetails(Object principal) {
+        String email;
+        String name;
+        List<String> roles = new ArrayList<>();
+
+        if (principal instanceof Jwt) {
+            Jwt jwt = (Jwt) principal;
+            email = jwt.getClaimAsString("email");
+            name = jwt.getClaimAsString("given_name");
+            List<String> roleStrings = resourceRoles.stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+            roles.addAll(roleStrings);
+        } else {
+            throw new IllegalStateException("Unsupported principal type: " + principal.getClass());
+        }
+
         Employee employee = employeeRepository.findByEmail(email);
         if (employee == null) {
             employee = new Employee();
             employee.setEmail(email);
             employee.setName(name);
         }
-        employee.setRoles(roles);
-            employeeRepository.save(employee);
-        
+        employee.setRoles(new HashSet<>(roles));
+        employeeRepository.save(employee);
 
         return employee;
     }
