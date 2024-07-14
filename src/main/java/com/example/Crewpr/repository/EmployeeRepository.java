@@ -7,5 +7,6 @@ import com.example.Crewpr.entity.Employee;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
 
-    Employee findByUsername(String username);
+    Employee findByname(String username);
+    Employee findByEmail(String email);
 }

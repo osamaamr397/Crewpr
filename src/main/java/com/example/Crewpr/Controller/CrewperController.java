@@ -1,4 +1,5 @@
 package com.example.Crewpr.Controller;
+import com.example.Crewpr.entity.Employee;
 import com.example.Crewpr.entity.Vacation;
 import com.example.Crewpr.service.EmployeeService;
 import com.example.Crewpr.service.VacationService;
@@ -16,14 +17,16 @@ public class CrewperController {
     @Autowired
     private EmployeeService employeeService;
 
+
     @Autowired
     CrewperController(VacationService vacationService){
         super();
         this.vacationService=vacationService;
     }
-    @PostMapping("/getEmployeefromKeycloak")
+    @GetMapping ("/getEmployeefromKeycloak")
     public ResponseEntity<?> getEmployeeFromKeycloak(){
-        return ResponseEntity.ok(employeeService.getCurrentEmployeeAndSave());
+        return ResponseEntity.ok(employeeService.getEmployee());
+
     }
     @PostMapping("/SubmitVacation")
      public ResponseEntity<?> submitVacation(@RequestBody Vacation vacation){
