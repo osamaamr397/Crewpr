@@ -10,17 +10,17 @@ import java.util.List;
 public interface VacationService {
     Vacation submitVacation(Vacation vacation);
 
-    Long RemainingDays(Long employeeId);
+    int RemainingDays(int employeeId);
 
 
 
-    Long TotalVacationDays(Long employeeId);
+   int TotalVacationDays(int employeeId);
 
 
 
 
     @Query("SELECT vh FROM VacationHistory vh WHERE vh.employee.id = :employeeId")
-    List<VacationHistory> findVacationHistoryByEmployeeId(Long employeeId);
+    List<VacationHistory> findVacationHistoryByEmployeeId(int employeeId);
 
 
 }

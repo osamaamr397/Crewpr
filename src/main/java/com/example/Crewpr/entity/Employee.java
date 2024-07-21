@@ -1,5 +1,7 @@
 package com.example.Crewpr.entity;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,35 +19,38 @@ import java.util.Set;
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
     @Column(name = "name")
     private String name;
     @Column(name = "email", nullable = false)
     private String email;
     @Column(name = "password", nullable =true)
     private String password;
-    @Column(name = "role", nullable = false)
-    private String role;
-    
-    
+
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     private List<Vacation> vacations;
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     private List<VacationHistory> vacationHistories;
+    @Column(name = "role", nullable =true)
+   private List<String> roles;
 
-   private Set<String> roles;
-    public void setRoles(Set<String> roles) {
+    public Employee(int id) {
+        this.id = id;
+    }
+
+    @JsonCreator // This tells Jackson to use this constructor for deserialization
+    public static Employee fromId(@JsonProperty("id") int id) {
+        return new Employee(id);
+    }
+
+
+    public void setRoles(List<String> roles) {
         this.roles = roles;
     }
-    public Set<String> getRoles() {
+    public List<String> getRoles() {
         return roles;
     }
-    public void setRole(String role) {
-        this.role = role;
-    }
-    public String getRole() {
-        return role;
-    }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -64,10 +69,10 @@ public class Employee {
     public String getPassword() {
         return password;
     }
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
-    public Long getId() {
+    public int getId() {
         return id;
     }
     public void setVacations(List<Vacation> vacations) {

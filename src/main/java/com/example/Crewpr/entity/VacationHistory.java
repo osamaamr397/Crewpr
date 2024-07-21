@@ -13,7 +13,7 @@ public class VacationHistory {
         
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
+        private int id;
     
         @Column(name = "StartDate", nullable = false)
         private LocalDate startDate;
@@ -22,10 +22,11 @@ public class VacationHistory {
         private LocalDate endDate;
         
         @ManyToOne
-        @JoinColumn(name = "employee_id") // Ensure this matches the column name in your database
+        @JoinColumn(name = "employee_id")
         private Employee employee;
     
         @ManyToOne
-        @JoinColumn(name = "vacation_id") // Ensure this matches the column name in your database
+        @JoinColumn(name = "vacation_id")
          private Vacation vacation;
+
 }

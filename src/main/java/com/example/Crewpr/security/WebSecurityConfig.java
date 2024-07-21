@@ -24,11 +24,11 @@ public class WebSecurityConfig {
         http.
                 authorizeHttpRequests(auth ->
                 {
-                    auth.requestMatchers(HttpMethod.GET, "/test/getEmployeefromKeycloak").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/test/SubmitVacation").hasRole(ADMIN);
-                    auth.requestMatchers(HttpMethod.GET, "/test/Total-balance/{empId}").hasRole(ADMIN);
-                    auth.requestMatchers(HttpMethod.GET, "/test/vacation-history/{empId}").hasRole(ADMIN);
-                    auth.requestMatchers(HttpMethod.GET, "/test/Total-remain/{empId}").hasAnyRole(ADMIN);
+                    auth.requestMatchers(HttpMethod.POST, "/test/ExtractEmployeeFromJWTAndSaveToDB").permitAll();
+                    auth.requestMatchers(HttpMethod.POST, "/test/SubmitVacation").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/test/Total-balance/{empId}").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/test/vacation-history/{empId}").permitAll();
+                    auth.requestMatchers(HttpMethod.GET, "/test/Total-remain/{empId}").permitAll();
                     auth.anyRequest().authenticated();
                 });
 

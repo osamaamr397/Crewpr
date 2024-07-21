@@ -5,6 +5,7 @@
         import java.time.DayOfWeek;
         import java.time.LocalDate;
         import java.util.List;
+        import java.util.Optional;
 
 
         import org.springframework.beans.factory.annotation.Autowired;
@@ -20,56 +21,62 @@
         private VacationRepository vacationRepository;
 
 
-            @Override
-            public Long RemainingDays(Long employeeId) {
 
-                return vacationRepository.getRemainingDays(employeeId);
-            }
-
+           
 
             @Override
-            public Long TotalVacationDays(Long employeeId) {
-                Long TotalVacationbalance=30L-RemainingDays(employeeId);
+            public int TotalVacationDays(int employeeId) {
+                int TotalVacationbalance=30-RemainingDays(employeeId);
 
                 return TotalVacationbalance;
+
             }
 
-
-
-
-            public List<VacationHistory> findVacationHistoryByEmployeeId(Long employeeId) {
+            public List<VacationHistory> findVacationHistoryByEmployeeId(int employeeId) {
             return vacationRepository.findVacationHistoryByEmployeeId(employeeId);
         }
 
+        public int getVacationDays(int employeeId) {
+            List<Integer> daysList = vacationRepository.findVacationDays(employeeId);
+            if (!daysList.isEmpty()) {
+
+                int totalDays = daysList.stream().mapToInt(Integer::intValue).sum();
+                return totalDays;
+            } else {
+                return 30;
+            }
+        }
 
             @Override
             public Vacation submitVacation(Vacation vacation) {
-            Long countVacation = countVacationDays(vacation.getStartDate(),vacation.getEndDate());
-            Long EmployeeId = vacation.getEmployee().getId();
-            Long totalVacationDays= vacationRepository.VacationDays(EmployeeId);
-            Long remainingVacationDays= totalVacationDays - countVacation;
+              //  if (isVacationValidForSubmission(vacation)) {
+                    int vacationDays = countVacationDays(vacation.getStartDate(), vacation.getEndDate());
+                    int remainingDays = RemainingDays(vacation.getEmployee().getId());
+                    vacation.setVacationDays(vacationDays);
+                    vacation.setRemainingDays(remainingDays - vacationDays);
+                    vacationRepository.save(vacation);
 
-            if(isVacationValidForSubmission(vacation)){
-                vacationRepository.updateRemainingDays(EmployeeId, remainingVacationDays);
-                vacationRepository.UpdateVacationDays(EmployeeId,remainingVacationDays);
-                return vacationRepository.save(vacation);
+                    vacationRepository.updateLastRemainingDays(vacation.getEmployee().getId(), vacation.getRemainingDays());
+                    return vacation;
+
+
+        }
+
+            @Override
+            public int  RemainingDays(int employeeId) {
+                boolean exists = vacationRepository.existsByEmployeeId(employeeId);
+                if (exists) {
+                    Optional<Integer> remainingDaysOptional = vacationRepository.getLastRemainingDays(employeeId);
+                    return remainingDaysOptional.orElse(30);
+                } else {
+                    return 30;
+                }
+               
             }
-            return null;
-
-        }
-
-        public Long getTotalRemainingDays(Long employeeId) {
-            return vacationRepository.getRemainingDays(employeeId);
-        }
 
 
-
-      
-
-
-
-        public long countVacationDays(LocalDate startDate, LocalDate endDate) {
-            long count = 0;
+        public int countVacationDays(LocalDate startDate, LocalDate endDate) {
+            int count = 0;
             LocalDate currentDate = startDate;
             while (!currentDate.isAfter(endDate)) {
                 DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
@@ -103,11 +110,14 @@
 
 
         public boolean isVacationBalanceEnough(Vacation vacation) {
-            Long totalVacationBalance = getTotalRemainingDays(vacation.getEmployee().getId());
-            long vacationDays = countVacationDays(vacation.getStartDate(), vacation.getEndDate());
+            int totalVacationBalance = RemainingDays(vacation.getEmployee().getId());
+            System.out.println(" totalVacationBalance from vacation balance"+totalVacationBalance);
+            int vacationDays = countVacationDays(vacation.getStartDate(), vacation.getEndDate());
+            System.out.println(" countVacationDays from vacation balance"+vacationDays);
             return totalVacationBalance >= vacationDays;
         }
-        public boolean isVacationOverlapping(Vacation vacation) {
+
+       /*  public boolean isVacationOverlapping(Vacation vacation) {
             List<VacationHistory> vacationHistory = findVacationHistoryByEmployeeId(vacation.getEmployee().getId());
             for (VacationHistory v : vacationHistory) {
                 if (v.getStartDate().isBefore(vacation.getEndDate()) && v.getEndDate().isAfter(vacation.getStartDate())) {
@@ -117,11 +127,11 @@
             return false;
         }
 
+        */
 
 
         public boolean isVacationValidForSubmission(Vacation vacation) {
-            return isVacationValid(vacation) && isVacationBalanceEnough(vacation) && !isVacationOverlapping(vacation);
-
+            return isVacationValid(vacation) && isVacationBalanceEnough(vacation) && countVacationDays(vacation.getStartDate(), vacation.getEndDate()) > 0;
         }
 
 

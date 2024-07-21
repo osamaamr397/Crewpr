@@ -16,7 +16,7 @@ public class Vacation {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(name = "StartDate", nullable = false)
     private LocalDate startDate;
@@ -29,10 +29,10 @@ public class Vacation {
     private Employee employee;
 
     @Column(name = "vacationDays", nullable = false)
-    private Long vacationDays = 30L;
+    private int vacationDays ;
     
     @Column(name = "remainingDays", nullable = false)
-    private Long remainingDays =30L;
+    private int remainingDays =30;
 
     @Column(name = "days_used")
     private int daysUsed;
